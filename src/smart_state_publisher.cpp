@@ -17,7 +17,7 @@ using JointState = sensor_msgs::JointState;
 class Source
 {
 public:
-    using Callback = std::function<void(const JointState&)>;
+    using Callback = std::function<void(const JointState&, const ros::Time&)>;
 
     explicit Source(const std::string& topic, const ros::Duration& minPeriod, const Callback& cb)
      : m_topic{topic}, m_minPeriod{minPeriod}, m_cb{cb}
@@ -45,12 +45,13 @@ private:
         );
     }
 
-    void handleMsg(const JointState& js)
+    void handleMsg(const ros::MessageEvent<JointState>& event)
     {
+        auto& js = *event.getMessage();
         if(js.header.stamp - m_lastStamp < m_minPeriod)
             return;
 
-        m_cb(js);
+        m_cb(js, event.getReceiptTime());
         m_lastStamp = js.header.stamp;
     }
 
@@ -67,6 +68,9 @@ int main(int argc, char** argv)
     ros::init(argc, argv, "smart_state_publisher");
 
     ros::NodeHandle nh{"~"};
+
+    bool diagnostics = false;
+    nh.getParam("diagnostics", diagnostics);
 
     robot_model_loader::RobotModelLoader loader("robot_description", false);
     auto model = loader.getModel();
@@ -106,8 +110,13 @@ int main(int argc, char** argv)
 
     // Dynamic transforms
     tf2_ros::TransformBroadcaster broadcaster;
+    std::vector<double> msgLatency;
+    std::vector<double> subscriberLatency;
+    std::vector<double> processingLatency;
 
-    auto update = [&](const JointState& msg){
+    auto update = [&](const JointState& msg, const ros::Time& receiptTime){
+        ros::Time startTime = ros::Time::now();
+
         if(msg.name.size() != msg.position.size())
         {
             ROS_ERROR_THROTTLE(1.0, "Ignoring invalid joint_state msg");
@@ -141,8 +150,45 @@ int main(int argc, char** argv)
             transforms.push_back(std::move(tmsg));
         }
 
+        ros::Time sendTime = ros::Time::now();
+
         broadcaster.sendTransform(transforms);
+
+        if(diagnostics)
+        {
+            msgLatency.push_back((receiptTime - msg.header.stamp).toSec());
+            subscriberLatency.push_back((startTime - receiptTime).toSec());
+            processingLatency.push_back((sendTime - startTime).toSec());
+        }
     };
+
+    ros::SteadyTimer statTimer;
+    if(diagnostics)
+    {
+        statTimer = nh.createSteadyTimer(ros::WallDuration(5.0), boost::function<void(const ros::SteadyTimerEvent&)>([&](auto&){
+            if(subscriberLatency.empty())
+                return;
+
+            auto calcMean = [](std::vector<double>& array){
+                double sum = 0.0;
+                for(auto& x : array)
+                    sum += x;
+
+                double mean = sum / array.size();
+
+                array.clear();
+
+                return mean;
+            };
+
+            std::size_t numMsgs = msgLatency.size();
+            double msgLatencyMean = calcMean(msgLatency);
+            double subscriberLatencyMean = calcMean(subscriberLatency);
+            double processingLatencyMean = calcMean(processingLatency);
+
+            ROS_INFO("Diagnostics: (%5lu messages): %.5fs msg, %.5fs subscriber, %.5fs processing", numMsgs, msgLatencyMean, subscriberLatencyMean, processingLatencyMean);
+       }));
+    }
 
     std::vector<Source> sources;
 
