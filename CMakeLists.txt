@@ -20,6 +20,13 @@ target_link_libraries(smart_state_publisher
     ${catkin_LIBRARIES}
 )
 
-install(TARGETS smart_state_publisher
+add_executable(measure_delay
+    src/measure_delay.cpp
+)
+target_link_libraries(measure_delay
+    ${catkin_LIBRARIES}
+)
+
+install(TARGETS smart_state_publisher measure_delay
     RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
