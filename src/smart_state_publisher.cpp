@@ -133,12 +133,12 @@ int main(int argc, char** argv)
 
             Eigen::Isometry3d transform = state.getJointTransform(joint);
 
-            geometry_msgs::TransformStamped msg = tf2::eigenToTransform(transform);
-            msg.header.frame_id = joint->getParentLinkModel()->getName();
-            msg.header.stamp = msg.header.stamp;
-            msg.child_frame_id = joint->getChildLinkModel()->getName();
+            geometry_msgs::TransformStamped tmsg = tf2::eigenToTransform(transform);
+            tmsg.header.frame_id = joint->getParentLinkModel()->getName();
+            tmsg.header.stamp = msg.header.stamp;
+            tmsg.child_frame_id = joint->getChildLinkModel()->getName();
 
-            transforms.push_back(std::move(msg));
+            transforms.push_back(std::move(tmsg));
         }
 
         broadcaster.sendTransform(transforms);
