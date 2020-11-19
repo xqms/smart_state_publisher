@@ -1,0 +1,12 @@
+<package format="3">
+    <name>smart_state_publisher</name>
+    <description>Efficient alternative to joint_state_publisher + robot_state_publisher</description>
+    <version>0.0.1</version>
+    <license>BSD</license>
+    <maintainer email="max.schwarz@ais.uni-bonn.de">Max Schwarz</maintainer>
+
+    <buildtool_depend>catkin</buildtool_depend>
+    <depend>roscpp</depend>
+    <depend>tf2_ros</depend>
+    <depend>moveit_ros_planning</depend>
+</package>
