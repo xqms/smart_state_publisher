@@ -23,7 +23,7 @@ int main(int argc, char** argv)
 
     std::vector<double> delays;
 
-    ros::TransportHints hints{};
+    ros::TransportHints hints = ros::TransportHints{}.tcpNoDelay(true);
     if(udp)
         hints = hints.udp();
 
