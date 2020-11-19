@@ -15,3 +15,6 @@ This node combines the effect of both nodes and does not use a fixed update
 rate. Instead, multiple `sensor_msgs/JointState` sources can be specified, each
 with a *rate limit*. Whenever a joint state message is received, the
 corresponding transforms are updated and sent out.
+
+[joint_state_publisher]: http://wiki.ros.org/joint_state_publisher
+[robot_state_publisher]: http://wiki.ros.org/robot_state_publisher
