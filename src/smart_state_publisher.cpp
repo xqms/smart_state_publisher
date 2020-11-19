@@ -167,7 +167,10 @@ int main(int argc, char** argv)
             else if(paramSource.getType() != XmlRpc::XmlRpcValue::TypeStruct)
             {
                 std::string topic = paramSource["topic"];
-                ros::Duration minPeriod{1.0 / static_cast<double>(paramSource["rate"])};
+                double rate = paramSource["rate"];
+
+                ros::Duration minPeriod{(rate == 0.0) ? 0.0 : (1.0 / rate)};
+
                 sources.emplace_back(topic, minPeriod, update);
             }
             else
