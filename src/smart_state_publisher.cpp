@@ -140,7 +140,7 @@ int main(int argc, char** argv)
 
             auto joint = model->getJointModel(j);
 
-            Eigen::Isometry3d transform = state.getJointTransform(joint);
+            Eigen::Isometry3d transform = joint->getChildLinkModel()->getJointOriginTransform() * state.getJointTransform(joint);
 
             geometry_msgs::TransformStamped tmsg = tf2::eigenToTransform(transform);
             tmsg.header.frame_id = joint->getParentLinkModel()->getName();
