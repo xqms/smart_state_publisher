@@ -108,11 +108,15 @@ int main(int argc, char** argv)
         staticBroadcaster.sendTransform(transforms);
     }
 
+    // Publish all received (rate-limited) messages on the agg topic
+    ros::Publisher pub_js_agg = nh.advertise<sensor_msgs::JointState>("joint_states_agg", 10);
+
     // Dynamic transforms
     tf2_ros::TransformBroadcaster broadcaster;
     std::vector<double> msgLatency;
     std::vector<double> subscriberLatency;
     std::vector<double> processingLatency;
+
 
     auto update = [&](const JointState& msg, const ros::Time& receiptTime){
         ros::Time startTime = ros::Time::now();
@@ -122,6 +126,8 @@ int main(int argc, char** argv)
             ROS_ERROR_THROTTLE(1.0, "Ignoring invalid joint_state msg");
             return;
         }
+
+        pub_js_agg.publish(msg);
 
         std::vector<geometry_msgs::TransformStamped> transforms;
 
