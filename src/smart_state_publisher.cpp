@@ -131,7 +131,22 @@ int main(int argc, char** argv)
 
         std::vector<geometry_msgs::TransformStamped> transforms;
 
-        state.setVariableValues(msg);
+        try
+        {
+            state.setVariableValues(msg);
+        }
+        catch(moveit::Exception& e)
+        {
+            std::stringstream ss;
+
+            ss << "Could net set variable values - probably a joint is not known. Known joints:";
+
+            for(auto joint : state.getVariableNames())
+                ss << " " << joint;
+
+            ROS_ERROR("%s", ss.str().c_str());
+            throw;
+        }
 
         std::vector<bool> jointUpdated(model->getJointModels().size(), false);
         for(std::size_t j = 0; j < jointUpdated.size(); ++j)
