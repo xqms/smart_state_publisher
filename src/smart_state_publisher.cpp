@@ -72,6 +72,9 @@ int main(int argc, char** argv)
     bool diagnostics = false;
     nh.getParam("diagnostics", diagnostics);
 
+    bool publishAllJoints = false;
+    nh.getParam("publish_all_joints", publishAllJoints);
+
     robot_model_loader::RobotModelLoader loader("robot_description", false);
     auto model = loader.getModel();
 
@@ -148,7 +151,7 @@ int main(int argc, char** argv)
             throw;
         }
 
-        std::vector<bool> jointUpdated(model->getJointModels().size(), false);
+        std::vector<bool> jointUpdated(model->getJointModels().size(), publishAllJoints);
         for(std::size_t j = 0; j < jointUpdated.size(); ++j)
             jointUpdated[j] = state.dirtyJointTransform(model->getJointModel(j));
 
