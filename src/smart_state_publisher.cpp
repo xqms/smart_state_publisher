@@ -161,6 +161,14 @@ int main(int argc, char** argv)
 
             auto joint = model->getJointModel(j);
 
+            if(!joint)
+                continue;
+
+            auto parentLink = joint->getParentLinkModel();
+
+            if(!parentLink)
+                continue;
+
             Eigen::Isometry3d transform = joint->getChildLinkModel()->getJointOriginTransform() * state.getJointTransform(joint);
 
             geometry_msgs::TransformStamped tmsg = tf2::eigenToTransform(transform);
