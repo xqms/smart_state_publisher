@@ -151,7 +151,7 @@ int main(int argc, char** argv)
             throw;
         }
 
-        std::vector<bool> jointUpdated(model->getJointModels().size(), publishAllJoints);
+        std::vector<bool> jointUpdated(model->getJointModels().size(), false);
         for(std::size_t j = 0; j < jointUpdated.size(); ++j)
             jointUpdated[j] = state.dirtyJointTransform(model->getJointModel(j));
 
@@ -159,7 +159,7 @@ int main(int argc, char** argv)
 
         for(std::size_t j = 0; j < jointUpdated.size(); ++j)
         {
-            if(!jointUpdated[j])
+            if(!publishAllJoints && !jointUpdated[j])
                 continue;
 
             auto joint = model->getJointModel(j);
