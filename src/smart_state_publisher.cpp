@@ -41,7 +41,7 @@ private:
         m_subscriber = ros::NodeHandle{}.subscribe(
             m_topic, 1,
             &Source::handleMsg, this,
-            ros::TransportHints().udp()
+            ros::TransportHints().tcpNoDelay()
         );
     }
 
