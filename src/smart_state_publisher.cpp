@@ -159,10 +159,13 @@ int main(int argc, char** argv)
 
         for(std::size_t j = 0; j < jointUpdated.size(); ++j)
         {
-            if(!publishAllJoints && !jointUpdated[j])
+            auto joint = model->getJointModel(j);
+
+            if(joint->getType() == robot_model::JointModel::FIXED)
                 continue;
 
-            auto joint = model->getJointModel(j);
+            if(!publishAllJoints && !jointUpdated[j])
+                continue;
 
             if(!joint)
                 continue;
